@@ -7,8 +7,10 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
 
-    public Questions[][] refQuestions;
+
+    public Questions[] refQuestions;
     private static List<Questions> unanswerQList;
+
     private Questions currentQuestion;
 
     [SerializeField]
@@ -21,32 +23,25 @@ public class GameManager : MonoBehaviour {
 
     [SerializeField]
     private float questionBuffer = 1f;
+    [SerializeField]
+    static int scorePoint = 0;
+    [SerializeField]
+    static Text scoreText;
 
     [SerializeField]
     Animator animator;
 
-    [SerializeField]
-    static int score;
-    [SerializeField]
-    public Text scoreText;
-
     void Start()
     {
-        if (unanswerQList[0] == null || unanswerQList.Count == 0)
+        if (unanswerQList == null || unanswerQList.Count == 0)
         {
             unanswerQList = refQuestions.ToList<Questions>();
         }
 
         SetCurrentQuestion();
         UpdateScore();
-    }
 
-    public void AddScore(int newScore)
-    {
-        score += newScore;
-        UpdateScore();
     }
-
     void SetCurrentQuestion()
     {
         int unanswerQIndex = Random.Range(0, unanswerQList.Count);
@@ -56,16 +51,26 @@ public class GameManager : MonoBehaviour {
 
         if (currentQuestion.isTrue)
         {
-            TruthAnswerText.text = "FALSE";
-            FalseAnswerText.text = "CORRECT";
-        }
-        else
-        { 
             TruthAnswerText.text = "CORRECT";
             FalseAnswerText.text = "FALSE";
         }
+        else
+        {
+            TruthAnswerText.text = "FALSE";
+            FalseAnswerText.text = "CORRECT";
+        }
     }
 
+    public void AddScore(int newScore)
+    {
+        scorePoint += newScore;
+        UpdateScore();
+    }
+
+    void UpdateScore()
+    {
+        scoreText.text = "Score: " + scorePoint;
+    }
 
     IEnumerator QuestionTransition()
     {
@@ -76,23 +81,17 @@ public class GameManager : MonoBehaviour {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    void UpdateScore()
-    {
-        scoreText.text = "Score: " + score;
-    }
-
     public void UserSelectTrue()
     {
         animator.SetTrigger("True");
         if (currentQuestion.isTrue)
         {
-            Debug.Log("Wrong!");
-            AddScore(-1);
+            Debug.Log("Right!");
+            AddScore(1);
         }
         else
         {
-            Debug.Log("Right!");
-            AddScore(1);
+            Debug.Log("Wrong!");
         }
 
         StartCoroutine(QuestionTransition());
@@ -103,13 +102,12 @@ public class GameManager : MonoBehaviour {
         animator.SetTrigger("False");
         if (!currentQuestion.isTrue)
         {
-            Debug.Log("Wrong!");
-            AddScore(-1);
+            Debug.Log("Right!");
+            AddScore(1);
         }
         else
         {
-            Debug.Log("Right!");
-            AddScore(1);
+            Debug.Log("Wrong!");
         }
 
         StartCoroutine(QuestionTransition());
